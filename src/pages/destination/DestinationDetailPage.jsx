@@ -97,7 +97,7 @@ const DestinationDetailPage = () => {
                 {priceLevelDisplay[destination.priceLevel]}
               </div>
               
-              {destination.categories.map((category, index) => (
+              {Array.isArray(destination.categories) && destination.categories.map((category, index) => (
                 <div 
                   key={index} 
                   className="flex items-center px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-800"

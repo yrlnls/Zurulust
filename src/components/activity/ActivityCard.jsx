@@ -72,7 +72,7 @@ function ActivityCard({
         </div>
         
         <div className="mt-2 flex flex-wrap gap-1">
-          {categories.map((category, index) => (
+          {Array.isArray(categories) && categories.map((category, index) => (
             <span 
               key={index}
               className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
