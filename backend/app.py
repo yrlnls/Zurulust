@@ -1,39 +1,38 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from models import db, User, Trip, Destination
 from config import Config
 from services.google_maps import GoogleMapsService
-import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
-# Initialize extensions
-db.init_app(app)
 CORS(app)
 
-# Create tables
-with app.app_context():
-    db.create_all()
+# Initialize services
+google_maps_service = GoogleMapsService()
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    return jsonify({'status': 'healthy', 'message': 'Backend server is running'})
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'message': 'Wanderlust API is running',
+        'google_maps_enabled': bool(Config.GOOGLE_MAPS_API_KEY)
+    })
 
 @app.route('/api/search/destinations', methods=['GET'])
 def search_destinations():
-    """Search for destinations using Google Maps API"""
+    """Search for destinations"""
     query = request.args.get('q', '')
+    limit = int(request.args.get('limit', 20))
+    
     if not query:
         return jsonify({'error': 'Query parameter is required'}), 400
     
     try:
-        maps_service = GoogleMapsService()
-        results = maps_service.search_places(query)
-        
+        destinations = google_maps_service.search_destinations(query, limit)
         return jsonify({
-            'results': results,
-            'total': len(results)
+            'destinations': destinations,
+            'total': len(destinations)
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -42,9 +41,7 @@ def search_destinations():
 def get_place_details(place_id):
     """Get detailed information about a specific place"""
     try:
-        maps_service = GoogleMapsService()
-        place_details = maps_service.get_place_details(place_id)
-        
+        place_details = google_maps_service.get_place_details(place_id)
         if place_details:
             return jsonify(place_details)
         else:
@@ -54,23 +51,20 @@ def get_place_details(place_id):
 
 @app.route('/api/places/nearby', methods=['GET'])
 def get_nearby_places():
-    """Get nearby places of interest"""
-    lat = request.args.get('lat', type=float)
-    lng = request.args.get('lng', type=float)
-    place_type = request.args.get('type', 'tourist_attraction')
-    radius = request.args.get('radius', 5000, type=int)
-    
-    if lat is None or lng is None:
-        return jsonify({'error': 'Latitude and longitude are required'}), 400
-    
+    """Find nearby places of interest"""
     try:
-        maps_service = GoogleMapsService()
-        results = maps_service.get_nearby_places(lat, lng, place_type, radius)
+        lat = float(request.args.get('lat'))
+        lng = float(request.args.get('lng'))
+        place_type = request.args.get('type', 'tourist_attraction')
+        radius = int(request.args.get('radius', 5000))
         
+        nearby_places = google_maps_service.find_nearby_places(lat, lng, place_type, radius)
         return jsonify({
-            'results': results,
-            'total': len(results)
+            'places': nearby_places,
+            'total': len(nearby_places)
         })
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid latitude or longitude'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -78,13 +72,12 @@ def get_nearby_places():
 def geocode_address():
     """Convert address to coordinates"""
     address = request.args.get('address', '')
+    
     if not address:
         return jsonify({'error': 'Address parameter is required'}), 400
     
     try:
-        maps_service = GoogleMapsService()
-        result = maps_service.geocode_address(address)
-        
+        result = google_maps_service.geocode_address(address)
         if result:
             return jsonify(result)
         else:
@@ -92,41 +85,18 @@ def geocode_address():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    users = User.query.all()
-    return jsonify([{
-        'id': user.id,
-        'username': user.username,
-        'email': user.email,
-        'created_at': user.created_at.isoformat() if user.created_at else None
-    } for user in users])
-
-@app.route('/api/trips', methods=['GET'])
-def get_trips():
-    trips = Trip.query.all()
-    return jsonify([{
-        'id': trip.id,
-        'title': trip.title,
-        'description': trip.description,
-        'destination': trip.destination,
-        'start_date': trip.start_date.isoformat() if trip.start_date else None,
-        'end_date': trip.end_date.isoformat() if trip.end_date else None,
-        'price': float(trip.price) if trip.price else None,
-        'user_id': trip.user_id
-    } for trip in trips])
-
 @app.route('/api/destinations', methods=['GET'])
 def get_destinations():
-    destinations = Destination.query.all()
-    return jsonify([{
-        'id': dest.id,
-        'name': dest.name,
-        'country': dest.country,
-        'description': dest.description,
-        'image_url': dest.image_url,
-        'rating': float(dest.rating) if dest.rating else None
-    } for dest in destinations])
+    """Get popular destinations (fallback endpoint)"""
+    try:
+        # Return popular destinations
+        destinations = google_maps_service.search_destinations('popular tourist destinations', 10)
+        return jsonify({
+            'destinations': destinations,
+            'total': len(destinations)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=Config.DEBUG, host='0.0.0.0', port=5000)
