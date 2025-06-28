@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from models import db, User, Trip, Destination
 from config import Config
+from services.google_maps import GoogleMapsService
 import os
 
 app = Flask(__name__)
@@ -18,6 +19,78 @@ with app.app_context():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy', 'message': 'Backend server is running'})
+
+@app.route('/api/search/destinations', methods=['GET'])
+def search_destinations():
+    """Search for destinations using Google Maps API"""
+    query = request.args.get('q', '')
+    if not query:
+        return jsonify({'error': 'Query parameter is required'}), 400
+    
+    try:
+        maps_service = GoogleMapsService()
+        results = maps_service.search_places(query)
+        
+        return jsonify({
+            'results': results,
+            'total': len(results)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/places/<place_id>', methods=['GET'])
+def get_place_details(place_id):
+    """Get detailed information about a specific place"""
+    try:
+        maps_service = GoogleMapsService()
+        place_details = maps_service.get_place_details(place_id)
+        
+        if place_details:
+            return jsonify(place_details)
+        else:
+            return jsonify({'error': 'Place not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/places/nearby', methods=['GET'])
+def get_nearby_places():
+    """Get nearby places of interest"""
+    lat = request.args.get('lat', type=float)
+    lng = request.args.get('lng', type=float)
+    place_type = request.args.get('type', 'tourist_attraction')
+    radius = request.args.get('radius', 5000, type=int)
+    
+    if lat is None or lng is None:
+        return jsonify({'error': 'Latitude and longitude are required'}), 400
+    
+    try:
+        maps_service = GoogleMapsService()
+        results = maps_service.get_nearby_places(lat, lng, place_type, radius)
+        
+        return jsonify({
+            'results': results,
+            'total': len(results)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/geocode', methods=['GET'])
+def geocode_address():
+    """Convert address to coordinates"""
+    address = request.args.get('address', '')
+    if not address:
+        return jsonify({'error': 'Address parameter is required'}), 400
+    
+    try:
+        maps_service = GoogleMapsService()
+        result = maps_service.geocode_address(address)
+        
+        if result:
+            return jsonify(result)
+        else:
+            return jsonify({'error': 'Address not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/users', methods=['GET'])
 def get_users():
