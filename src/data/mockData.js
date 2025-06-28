@@ -79,6 +79,16 @@ export const mockDestinations = [
     rating: 4.8,
     priceLevel: 'moderate',
     description: 'Experience the beautiful beaches and vibrant culture of Bali.',
+    categories: ['relaxation', 'culture', 'nature'],
+    weatherInfo: {
+      temperature: 28,
+      condition: 'sunny',
+      forecast: [
+        { date: '2024-07-15', temperature: { max: 30, min: 24 }, condition: 'sunny' },
+        { date: '2024-07-16', temperature: { max: 29, min: 23 }, condition: 'partly cloudy' },
+        { date: '2024-07-17', temperature: { max: 31, min: 25 }, condition: 'sunny' }
+      ]
+    }
   },
   {
     id: '2',
@@ -88,7 +98,55 @@ export const mockDestinations = [
     rating: 4.7,
     priceLevel: 'luxury',
     description: 'Discover the art, fashion, and gastronomy of Paris.',
+    categories: ['culture', 'urban', 'art'],
+    weatherInfo: {
+      temperature: 22,
+      condition: 'partly cloudy',
+      forecast: [
+        { date: '2024-07-15', temperature: { max: 24, min: 18 }, condition: 'cloudy' },
+        { date: '2024-07-16', temperature: { max: 26, min: 19 }, condition: 'sunny' },
+        { date: '2024-07-17', temperature: { max: 23, min: 17 }, condition: 'rainy' }
+      ]
+    }
   },
+  {
+    id: '3',
+    name: 'Tokyo',
+    country: 'Japan',
+    imageUrl: 'https://images.pexels.com/photos/2506923/pexels-photo-2506923.jpeg',
+    rating: 4.9,
+    priceLevel: 'moderate',
+    description: 'Experience the perfect blend of traditional and modern culture in Tokyo.',
+    categories: ['culture', 'urban', 'adventure'],
+    weatherInfo: {
+      temperature: 25,
+      condition: 'cloudy',
+      forecast: [
+        { date: '2024-07-15', temperature: { max: 27, min: 21 }, condition: 'cloudy' },
+        { date: '2024-07-16', temperature: { max: 29, min: 23 }, condition: 'sunny' },
+        { date: '2024-07-17', temperature: { max: 26, min: 20 }, condition: 'rainy' }
+      ]
+    }
+  },
+  {
+    id: '4',
+    name: 'Santorini',
+    country: 'Greece',
+    imageUrl: 'https://images.pexels.com/photos/1285625/pexels-photo-1285625.jpeg',
+    rating: 4.6,
+    priceLevel: 'luxury',
+    description: 'Stunning sunsets and white-washed buildings overlooking the Aegean Sea.',
+    categories: ['relaxation', 'culture', 'nature'],
+    weatherInfo: {
+      temperature: 26,
+      condition: 'sunny',
+      forecast: [
+        { date: '2024-07-15', temperature: { max: 28, min: 22 }, condition: 'sunny' },
+        { date: '2024-07-16', temperature: { max: 30, min: 24 }, condition: 'sunny' },
+        { date: '2024-07-17', temperature: { max: 27, min: 21 }, condition: 'partly cloudy' }
+      ]
+    }
+  }
 ];
 
 export const getRecommendedDestinations = (user) => {
@@ -96,20 +154,69 @@ export const getRecommendedDestinations = (user) => {
 };
 
 export const getActivitiesForDestination = (destinationId) => {
-  return [
-    { id: 'act1', name: 'Surfing Lesson', destinationId: '1' },
-    { id: 'act2', name: 'Temple Tour', destinationId: '1' },
-    { id: 'act3', name: 'Eiffel Tower Visit', destinationId: '2' },
-    { id: 'act4', name: 'Louvre Museum Tour', destinationId: '2' },
-  ].filter(act => act.destinationId === destinationId);
+  const activities = {
+    '1': [
+      { 
+        id: 'act1', 
+        name: 'Surfing Lesson', 
+        destinationId: '1',
+        description: 'Learn to surf on the beautiful beaches of Bali',
+        imageUrl: 'https://images.pexels.com/photos/390051/surfer-wave-sunset-the-indian-ocean-390051.jpeg',
+        duration: 3,
+        price: 45,
+        rating: 4.7,
+        categories: ['adventure', 'water sports']
+      },
+      { 
+        id: 'act2', 
+        name: 'Temple Tour', 
+        destinationId: '1',
+        description: 'Visit ancient Hindu temples and learn about Balinese culture',
+        imageUrl: 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg',
+        duration: 4,
+        price: 35,
+        rating: 4.8,
+        categories: ['culture', 'history']
+      }
+    ],
+    '2': [
+      { 
+        id: 'act3', 
+        name: 'Eiffel Tower Visit', 
+        destinationId: '2',
+        description: 'Iconic tower with stunning views of Paris',
+        imageUrl: 'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg',
+        duration: 2,
+        price: 25,
+        rating: 4.6,
+        categories: ['sightseeing', 'culture']
+      },
+      { 
+        id: 'act4', 
+        name: 'Louvre Museum Tour', 
+        destinationId: '2',
+        description: 'Explore the world\'s largest art museum',
+        imageUrl: 'https://images.pexels.com/photos/2675266/pexels-photo-2675266.jpeg',
+        duration: 3,
+        price: 20,
+        rating: 4.9,
+        categories: ['culture', 'art', 'history']
+      }
+    ]
+  };
+  
+  return activities[destinationId] || [];
 };
 
 export const mockTrips = [
   {
     id: 'trip-1',
     name: 'Bali Adventure',
+    startDate: '2024-08-15',
+    endDate: '2024-08-22',
+    status: 'planning',
     destinations: [
-      { id: '1', name: 'Bali', country: 'Indonesia' }
+      { id: '1', name: 'Bali', country: 'Indonesia', imageUrl: 'https://images.pexels.com/photos/460621/pexels-photo-460621.jpeg' }
     ],
     itinerary: [
       {
@@ -126,6 +233,28 @@ export const getDestinationById = (id) => {
   return mockDestinations.find(dest => dest.id === id);
 };
 
-// The old mockUsers is being replaced by the HR `users` export.
-// If any part of the trip planner app needs it, it should be adapted to use the main `users` export.
-export const mockUsers = users;
+// Travel planner users - demo accounts for login
+export const mockUsers = [
+  {
+    id: 'user-1',
+    name: 'John Doe',
+    email: 'john@example.com',
+    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150',
+    preferences: {
+      budget: 'moderate',
+      interests: ['adventure', 'culture'],
+      travelStyle: ['backpacking', 'luxury']
+    }
+  },
+  {
+    id: 'user-2',
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150',
+    preferences: {
+      budget: 'luxury',
+      interests: ['relaxation', 'culture'],
+      travelStyle: ['luxury', 'romantic']
+    }
+  }
+];

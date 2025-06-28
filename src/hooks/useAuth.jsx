@@ -12,7 +12,12 @@ export const AuthProvider = ({ children }) => {
     // Check if user is logged in from localStorage
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error('Error parsing stored user:', err);
+        localStorage.removeItem('currentUser');
+      }
     }
     setIsLoading(false);
   }, []);
@@ -20,20 +25,26 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setIsLoading(true);
     setError(null);
+    
     try {
-      setTimeout(() => {
-        const user = mockData.mockUsers.find(user => user.email === email);
-        if (user) {
-          setCurrentUser(user);
-          localStorage.setItem('currentUser', JSON.stringify(user));
-        } else {
-          setError('Invalid credentials');
-        }
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const user = mockData.mockUsers.find(user => user.email === email);
+      if (user) {
+        setCurrentUser(user);
+        localStorage.setItem('currentUser', JSON.stringify(user));
         setIsLoading(false);
-      }, 1000);
+        return user;
+      } else {
+        setError('Invalid email or password');
+        setIsLoading(false);
+        return null;
+      }
     } catch (err) {
       setError('An error occurred during login');
       setIsLoading(false);
+      return null;
     }
   };
 
@@ -45,36 +56,52 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     setIsLoading(true);
     setError(null);
+    
     try {
-      setTimeout(() => {
-        const existingUser = mockData.mockUsers.find(user => user.email === email);
-        if (existingUser) {
-          setError('Email already in use');
-        } else {
-          const newUser = {
-            id: `user-${Date.now()}`,
-            name,
-            email,
-            preferences: {
-              budget: 'moderate',
-              interests: [],
-              travelStyle: []
-            }
-          };
-          mockData.mockUsers.push(newUser);
-          setCurrentUser(newUser);
-          localStorage.setItem('currentUser', JSON.stringify(newUser));
-        }
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const existingUser = mockData.mockUsers.find(user => user.email === email);
+      if (existingUser) {
+        setError('Email already in use');
         setIsLoading(false);
-      }, 1000);
+        return null;
+      } else {
+        const newUser = {
+          id: `user-${Date.now()}`,
+          name,
+          email,
+          preferences: {
+            budget: 'moderate',
+            interests: [],
+            travelStyle: []
+          }
+        };
+        
+        // Add to mock data
+        mockData.mockUsers.push(newUser);
+        
+        setCurrentUser(newUser);
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        setIsLoading(false);
+        return newUser;
+      }
     } catch (err) {
       setError('An error occurred during registration');
       setIsLoading(false);
+      return null;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, isLoading, error, login, logout, register }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      isLoading, 
+      error, 
+      login, 
+      logout, 
+      register 
+    }}>
       {children}
     </AuthContext.Provider>
   );

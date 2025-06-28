@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, UserPlus } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -12,8 +12,15 @@ const SignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [formError, setFormError] = useState('');
   
-  const { register, isLoading, error } = useAuth();
+  const { register, isLoading, error, currentUser } = useAuth();
   const navigate = useNavigate();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,8 +53,10 @@ const SignupPage = () => {
     }
     
     try {
-      await register(name, email, password);
-      navigate('/trips');
+      const result = await register(name, email, password);
+      if (result) {
+        navigate('/');
+      }
     } catch (err) {
       console.error('Registration error:', err);
     }
@@ -92,7 +101,7 @@ const SignupPage = () => {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                leftIcon={<User className="h-5 w-5" />}
+                leftIcon={<User className="h-5 w-5 text-gray-400" />}
                 fullWidth
                 autoComplete="name"
                 required
@@ -106,7 +115,7 @@ const SignupPage = () => {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                leftIcon={<Mail className="h-5 w-5" />}
+                leftIcon={<Mail className="h-5 w-5 text-gray-400" />}
                 fullWidth
                 autoComplete="email"
                 required
@@ -120,7 +129,7 @@ const SignupPage = () => {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                leftIcon={<Lock className="h-5 w-5" />}
+                leftIcon={<Lock className="h-5 w-5 text-gray-400" />}
                 fullWidth
                 autoComplete="new-password"
                 required
@@ -135,7 +144,7 @@ const SignupPage = () => {
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                leftIcon={<Lock className="h-5 w-5" />}
+                leftIcon={<Lock className="h-5 w-5 text-gray-400" />}
                 fullWidth
                 autoComplete="new-password"
                 required

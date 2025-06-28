@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -10,8 +10,15 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   
-  const { login, isLoading, error } = useAuth();
+  const { login, isLoading, error, currentUser } = useAuth();
   const navigate = useNavigate();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,11 +36,19 @@ const LoginPage = () => {
     }
     
     try {
-      await login(email, password);
-      navigate('/trips');
+      const result = await login(email, password);
+      if (result) {
+        navigate('/');
+      }
     } catch (err) {
       console.error('Login error:', err);
     }
+  };
+
+  // Demo login function
+  const handleDemoLogin = (demoEmail) => {
+    setEmail(demoEmail);
+    setPassword('password');
   };
   
   return (
@@ -75,7 +90,7 @@ const LoginPage = () => {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                leftIcon={<Mail className="h-5 w-5" />}
+                leftIcon={<Mail className="h-5 w-5 text-gray-400" />}
                 fullWidth
                 autoComplete="email"
                 required
@@ -89,7 +104,7 @@ const LoginPage = () => {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                leftIcon={<Lock className="h-5 w-5" />}
+                leftIcon={<Lock className="h-5 w-5 text-gray-400" />}
                 fullWidth
                 autoComplete="current-password"
                 required
@@ -133,27 +148,27 @@ const LoginPage = () => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500">Try demo accounts</span>
               </div>
             </div>
 
-            <div className="mt-6">
-              <div>
-                <Button
-                  type="button"
-                  fullWidth
-                  variant="outline"
-                >
-                  <span className="sr-only">Sign in with Google</span>
-                  <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-                    <path
-                      d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C8.086 2 4.5 5.592 4.5 10.06c0 4.469 3.586 8.061 8.045 8.061 4.637 0 7.932-3.267 7.932-7.842 0-.715-.056-1.311-.202-1.881l-7.73-.159z"
-                      fill="#4285F4"
-                    />
-                  </svg>
-                  Sign in with Google
-                </Button>
-              </div>
+            <div className="mt-6 grid grid-cols-1 gap-3">
+              <Button
+                type="button"
+                fullWidth
+                variant="outline"
+                onClick={() => handleDemoLogin('john@example.com')}
+              >
+                Demo User - John
+              </Button>
+              <Button
+                type="button"
+                fullWidth
+                variant="outline"
+                onClick={() => handleDemoLogin('jane@example.com')}
+              >
+                Demo User - Jane
+              </Button>
             </div>
           </div>
         </div>
