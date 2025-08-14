@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Tag, DollarSign, Filter, X, Info } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { mockDestinations, getRecommendedDestinations } from '../../data/mockData';
+import { destinations, getRecommendedDestinations } from '../../data/destinations';
 import { getApiSetupInstructions } from '../../services/travelApi';
 import DestinationCard from '../../components/destination/DestinationCard';
 import DestinationSearch from '../../components/search/DestinationSearch';
 import DestinationDetails from '../../components/destination/DestinationDetails';
+import AddDestinationModal from '../../components/destination/AddDestinationModal';
+import GoogleMap from '../../components/map/GoogleMap';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
@@ -13,10 +15,12 @@ const ExplorePage = () => {
   const { currentUser } = useAuth();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [destinations, setDestinations] = useState(mockDestinations);
-  const [filteredDestinations, setFilteredDestinations] = useState(mockDestinations);
+  const [allDestinations, setAllDestinations] = useState(destinations);
+  const [filteredDestinations, setFilteredDestinations] = useState(destinations);
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [showApiInfo, setShowApiInfo] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   
   // Filters
   const [showFilters, setShowFilters] = useState(false);
@@ -27,17 +31,17 @@ const ExplorePage = () => {
   useEffect(() => {
     if (currentUser) {
       const recommended = getRecommendedDestinations(currentUser);
-      setDestinations(recommended);
+      setAllDestinations(recommended);
       setFilteredDestinations(recommended);
     } else {
-      setDestinations(mockDestinations);
-      setFilteredDestinations(mockDestinations);
+      setAllDestinations(destinations);
+      setFilteredDestinations(destinations);
     }
   }, [currentUser]);
   
   // Filter destinations based on search and filters
   useEffect(() => {
-    let filtered = destinations;
+    let filtered = allDestinations;
     
     // Filter by search term
     if (searchTerm) {
@@ -63,14 +67,14 @@ const ExplorePage = () => {
     }
     
     setFilteredDestinations(filtered);
-  }, [searchTerm, destinations, selectedStyles, selectedBudget]);
+  }, [searchTerm, allDestinations, selectedStyles, selectedBudget]);
   
   const handleDestinationSelect = (destination) => {
     // Add the searched destination to our list if it's not already there
-    const exists = destinations.find(d => d.id === destination.id);
+    const exists = allDestinations.find(d => d.id === destination.id);
     if (!exists) {
-      const newDestinations = [...destinations, destination];
-      setDestinations(newDestinations);
+      const newDestinations = [...allDestinations, destination];
+      setAllDestinations(newDestinations);
       setFilteredDestinations(newDestinations);
     }
     setSelectedDestination(destination);
@@ -79,6 +83,12 @@ const ExplorePage = () => {
   const handleAddToTrip = (destination) => {
     // This would integrate with the trip planning functionality
     alert(`Added ${destination.name} to your trip!`);
+  };
+  
+  const handleAddDestination = (newDestination) => {
+    const updatedDestinations = [...allDestinations, newDestination];
+    setAllDestinations(updatedDestinations);
+    setFilteredDestinations(updatedDestinations);
   };
   
   const clearFilters = () => {
@@ -178,6 +188,26 @@ const ExplorePage = () => {
       
       <div className="mt-8 bg-white shadow overflow-hidden rounded-lg">
         <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium text-gray-900">Search & Explore</h2>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowMap(!showMap)}
+                leftIcon={<MapPin className="h-5 w-5" />}
+              >
+                {showMap ? 'Hide Map' : 'Show Map'}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => setShowAddModal(true)}
+                leftIcon={<Plus className="h-5 w-5" />}
+              >
+                Add Destination
+              </Button>
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
             <div className="flex-1">
               <DestinationSearch 
@@ -266,6 +296,17 @@ const ExplorePage = () => {
           )}
         </div>
         
+        {/* Google Map */}
+        {showMap && (
+          <div className="p-6 border-b border-gray-200">
+            <GoogleMap
+              destinations={filteredDestinations}
+              height="400px"
+              onMarkerClick={setSelectedDestination}
+            />
+          </div>
+        )}
+        
         {filteredDestinations.length === 0 ? (
           <div className="py-16 text-center">
             <div className="flex justify-center">
@@ -289,6 +330,13 @@ const ExplorePage = () => {
           </div>
         )}
       </div>
+
+      {/* Add Destination Modal */}
+      <AddDestinationModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddDestination}
+      />
     </div>
   );
 };

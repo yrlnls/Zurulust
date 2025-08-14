@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import * as mockData from '../data/mockData';
+import { users as mockUsers } from '../data/users';
 
 const AuthContext = createContext(undefined);
 
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const user = mockData.mockUsers.find(user => user.email === email);
+      const user = mockUsers.find(user => user.email === email);
       if (user) {
         setCurrentUser(user);
         localStorage.setItem('currentUser', JSON.stringify(user));
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const existingUser = mockData.mockUsers.find(user => user.email === email);
+      const existingUser = mockUsers.find(user => user.email === email);
       if (existingUser) {
         setError('Email already in use');
         setIsLoading(false);
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         };
         
         // Add to mock data
-        mockData.mockUsers.push(newUser);
+        mockUsers.push(newUser);
         
         setCurrentUser(newUser);
         localStorage.setItem('currentUser', JSON.stringify(newUser));

@@ -1,10 +1,20 @@
 // Travel API service integrations
+import { destinations, searchDestinations as searchDestinationsLocal } from '../data/destinations';
+
 const RAPIDAPI_KEY = 'your-rapidapi-key'; // Users will need to get their own key
 const OPENCAGE_API_KEY = 'your-opencage-key'; // Free geocoding API key
 
-// OpenCage Geocoding API (Free tier: 2,500 requests/day)
+// Enhanced search that combines local data with API results
 export const searchDestinations = async (query) => {
-  // Check if API key is configured
+  // First search local destinations
+  const localResults = searchDestinationsLocal(query);
+  
+  // If we have good local results, return them
+  if (localResults.length > 0) {
+    return localResults;
+  }
+  
+  // Check if API key is configured for external search
   if (!OPENCAGE_API_KEY || OPENCAGE_API_KEY === 'your-opencage-key') {
     console.warn('OpenCage API key not configured, using mock data');
     return getMockSearchResults(query);

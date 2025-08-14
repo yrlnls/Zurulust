@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Star, Thermometer, Users, Calendar, Wifi, Car, Utensils } from 'lucide-react';
 import { getCountryInfo, getWeatherInfo, getNearbyAttractions, getNearbyHotels } from '../../services/travelApi';
 import WeatherWidget from '../weather/WeatherWidget';
+import GoogleMap from '../map/GoogleMap';
 import Button from '../ui/Button';
 
 const DestinationDetails = ({ destination, onAddToTrip }) => {
@@ -109,6 +110,15 @@ const DestinationDetails = ({ destination, onAddToTrip }) => {
                 <div>
                   <h3 className="text-lg font-semibold mb-3">About {destination.name}</h3>
                   <p className="text-gray-600">{destination.description}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Location</h3>
+                  <GoogleMap
+                    destinations={[destination]}
+                    height="300px"
+                    zoom={12}
+                  />
                 </div>
 
                 {countryInfo && (

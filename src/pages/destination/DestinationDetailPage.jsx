@@ -1,10 +1,12 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Star, Tag, DollarSign, CalendarPlus, Share2, Heart, Plus } from 'lucide-react';
-import { getDestinationById, getActivitiesForDestination } from '../../data/mockData';
+import { getDestinationById } from '../../data/destinations';
+import { getActivitiesForDestination } from '../../data/mockData';
 import { useTrip } from '../../hooks/useTrip';
 import ActivityCard from '../../components/activity/ActivityCard';
 import WeatherWidget from '../../components/weather/WeatherWidget';
+import GoogleMap from '../../components/map/GoogleMap';
 import Button from '../../components/ui/Button';
 
 const DestinationDetailPage = () => {
@@ -186,10 +188,11 @@ const DestinationDetailPage = () => {
           {/* Map Placeholder */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Location</h3>
-            <div className="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-              <MapPin className="h-8 w-8 text-gray-400" />
-              <span className="ml-2 text-gray-500">Map view</span>
-            </div>
+            <GoogleMap
+              destinations={[destination]}
+              height="300px"
+              zoom={12}
+            />
           </div>
         </div>
       </div>

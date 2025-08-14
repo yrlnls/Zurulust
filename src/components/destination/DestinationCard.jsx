@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Star, ThermometerSun } from 'lucide-react';
+import { MapPin, Star, ThermometerSun, ExternalLink } from 'lucide-react';
 import Button from '../ui/Button';
 
 const DestinationCard = ({ 
@@ -51,6 +51,19 @@ const DestinationCard = ({
         {showDetails && (
           <p className="mt-3 text-sm text-gray-600 line-clamp-3">{destination.description}</p>
         )}
+        
+        {/* Image source link */}
+        <div className="mt-2">
+          <a 
+            href={imageUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center text-xs text-gray-500 hover:text-teal-600 transition-colors"
+          >
+            <ExternalLink className="w-3 h-3 mr-1" />
+            View Image Source
+          </a>
+        </div>
         
         <div className="mt-4 flex space-x-2">
           <Link to={`/destinations/${id}`} className="flex-1">

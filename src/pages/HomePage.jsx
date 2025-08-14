@@ -4,11 +4,11 @@ import { Search, MapPin, Calendar, Compass, TrendingUp, Heart, Plane, Star } fro
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import DestinationCard from '../components/destination/DestinationCard';
-import { mockDestinations } from '../data/mockData';
+import { destinations } from '../data/destinations';
 
 const HomePage = () => {
   // Take top 4 destinations for featured section
-  const featuredDestinations = mockDestinations.slice(0, 4);
+  const featuredDestinations = destinations.slice(0, 4);
 
   return (
     <div className="min-h-screen">
